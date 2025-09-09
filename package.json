@@ -1,9 +1,12 @@
 {
-  "name": "forq-sdk-typescript",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@forq/sdk",
+  "version": "0.0.1",
+  "description": "TypeScript SDK for Forq",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -17,9 +20,18 @@
     "prepublishOnly": "npm run build",
     "test": "echo \"No tests yet\" && exit 0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "queue",
+    "message-queue",
+    "sqlite",
+    "forq",
+    "typescript",
+    "indie-dev",
+    "bootstrap",
+    "background-jobs"
+  ],
+  "author": "Myko Nordy",
+  "license": "Apache-2.0",
   "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.35.0",
