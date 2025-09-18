@@ -9,7 +9,7 @@ export class ForqProducer {
         this.forqServerUrl = forqServerUrl.replace(/\/$/, '');
     }
 
-    async produce(queueName: string, payload: NewMessageRequest): Promise<void> {
+    async sendMessage(newMessage: NewMessageRequest, queueName: string): Promise<void> {
         const url = `${this.forqServerUrl}/api/v1/queues/${queueName}/messages`;
 
         const response = await fetch(url, {
@@ -19,7 +19,7 @@ export class ForqProducer {
                 'Content-Type': 'application/json',
                 'X-API-Key': this.authSecret
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(newMessage)
         });
 
         if (response.status === 204) {
