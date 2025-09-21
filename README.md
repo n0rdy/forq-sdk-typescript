@@ -1,5 +1,7 @@
 # TypeScript SDK for Forq - Simple Message Queue powered by SQLite
 
+Check out the [Forq project](https://forq.sh) for more information about the server itself.
+
 ## TypeScript SDK
 
 The TypeScript SDK code is available at [GitHub](https://github.com/n0rdy/forq-sdk-typescript)
