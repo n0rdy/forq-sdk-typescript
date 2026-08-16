@@ -101,3 +101,30 @@ describe("ForqConsumer", () => {
         expect(fetchMock.mock.calls[0][0]).toBe(`${BASE}/api/v1/queues/orders/messages`);
     });
 });
+
+describe("ForqConsumer input validation", () => {
+    it("ack rejects a message without a receipt", async () => {
+        mockFetch(204);
+        const consumer = new ForqConsumer(BASE, SECRET);
+
+        await expect(consumer.ack("orders", {id: "msg-1", content: "x"} as MessageResponse))
+            .rejects.toThrow(/receipt/);
+    });
+
+    it("nack rejects a message without an id", async () => {
+        mockFetch(204);
+        const consumer = new ForqConsumer(BASE, SECRET);
+
+        await expect(consumer.nack("orders", {content: "x", receipt: "r"} as MessageResponse))
+            .rejects.toThrow(/id and receipt/);
+    });
+
+    it("URL-encodes the queue name", async () => {
+        const fetchMock = mockFetch(204);
+        const consumer = new ForqConsumer(BASE, SECRET);
+
+        await consumer.consumeOne("orders/evil");
+
+        expect(fetchMock.mock.calls[0][0]).toBe(`${BASE}/api/v1/queues/orders%2Fevil/messages`);
+    });
+});

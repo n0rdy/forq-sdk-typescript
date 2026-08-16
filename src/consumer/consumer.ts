@@ -10,7 +10,7 @@ export class ForqConsumer {
     }
 
     async consumeOne(queueName: string): Promise<MessageResponse | null> {
-        const url = `${this.forqServerUrl}/api/v1/queues/${queueName}/messages`;
+        const url = `${this.forqServerUrl}/api/v1/queues/${encodeURIComponent(queueName)}/messages`;
 
         const response = await fetch(url, {
             method: 'GET',
@@ -39,7 +39,8 @@ export class ForqConsumer {
      * delivery.
      */
     async ack(queueName: string, message: MessageResponse): Promise<void> {
-        const url = `${this.forqServerUrl}/api/v1/queues/${queueName}/messages/${message.id}/ack`;
+        validateMessage(message);
+        const url = `${this.forqServerUrl}/api/v1/queues/${encodeURIComponent(queueName)}/messages/${encodeURIComponent(message.id)}/ack`;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -63,7 +64,8 @@ export class ForqConsumer {
      * exact delivery via the message's receipt.
      */
     async nack(queueName: string, message: MessageResponse): Promise<void> {
-        const url = `${this.forqServerUrl}/api/v1/queues/${queueName}/messages/${message.id}/nack`;
+        validateMessage(message);
+        const url = `${this.forqServerUrl}/api/v1/queues/${encodeURIComponent(queueName)}/messages/${encodeURIComponent(message.id)}/nack`;
 
         const response = await fetch(url, {
             method: 'POST',
@@ -79,5 +81,13 @@ export class ForqConsumer {
         }
         const errorResponse = await response.json();
         throw new ForqError(response.status, errorResponse);
+    }
+}
+// fail fast with a clear error instead of sending the literal string
+// "undefined" as an id or receipt (possible for callers outside TypeScript's
+// type checking)
+function validateMessage(message: MessageResponse): void {
+    if (!message?.id || !message?.receipt) {
+        throw new Error('message must carry id and receipt - pass the message returned by consumeOne');
     }
 }
