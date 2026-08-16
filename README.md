@@ -29,7 +29,7 @@ You can then use the producer to send messages:
 const queueName = 'my-queue';
 const newMessage: NewMessageRequest = {
     content: 'I am going on an adventure!',
-    processAfter: 1757875397418,
+    processAfter: Date.now() + 3_600_000, // optional: deliver in 1 hour; omit for immediate delivery
 };
 
 async function sendMessageWithErrorHandling() {
@@ -68,6 +68,7 @@ try {
         console.log('Message received:', message);
         console.log('Message ID:', message.id);
         console.log('Message content:', message.content);
+        // message.receipt is the opaque delivery receipt - the SDK sends it on ack/nack for you
         return message;
     } else {
         console.log('No messages available in queue');
@@ -88,8 +89,8 @@ If processing is successful, you have to acknowledge the message, otherwise it w
 
 ```typescript
 try {
-    await consumer.ack('my-queue', messageId);
-    console.log(`Message ${messageId} acknowledged successfully`);
+    await consumer.ack('my-queue', message);
+    console.log(`Message ${message.id} acknowledged successfully`);
 } catch (error) {
     if (error instanceof ForqError) {
         console.error(`ForqError during ack: Status ${error.httpStatusCode} and error response ${error.errorResponse}`, error);
@@ -104,8 +105,8 @@ If processing failed, you have to nack the message:
 
 ```typescript
 try {
-    await consumer.nack('my-queue', messageId);
-    console.log(`Message ${messageId} nacked successfully`);
+    await consumer.nack('my-queue', message);
+    console.log(`Message ${message.id} nacked successfully`);
 } catch (error) {
     if (error instanceof ForqError) {
         console.error(`ForqError during nack: Status ${error.httpStatusCode} and error response ${error.errorResponse}`, error);
@@ -115,3 +116,8 @@ try {
     throw error;
 }
 ```
+
+`ack` and `nack` take the whole `MessageResponse` (not just the ID) because the server requires the delivery
+receipt from the consume response - the SDK sends it for you via the `X-Forq-Receipt` header. It fences the
+ack/nack to that exact delivery, so a late ack/nack from a consumer that exceeded the max processing time
+cannot affect a redelivery owned by another consumer.

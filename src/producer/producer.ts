@@ -10,7 +10,7 @@ export class ForqProducer {
     }
 
     async sendMessage(newMessage: NewMessageRequest, queueName: string): Promise<void> {
-        const url = `${this.forqServerUrl}/api/v1/queues/${queueName}/messages`;
+        const url = `${this.forqServerUrl}/api/v1/queues/${encodeURIComponent(queueName)}/messages`;
 
         const response = await fetch(url, {
             method: 'POST',
